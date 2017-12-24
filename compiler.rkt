@@ -1,25 +1,10 @@
 #lang racket
 
-(require (only-in plai define-type))
+(require
+  "core-grammar.rkt"
+  (only-in plai define-type))
 
-(provide compile-grammar
-         grammar word rule-reference list-reference optional repeat sequence alternative)
-
-; Input language
-
-(define-type Grammar
-  (grammar [imports (listof symbol?)]
-           [exports (listof symbol?)]
-           [rules (hash/c symbol? Rule-Expr?)]))
-
-(define-type Rule-Expr
-  (word [str string?])
-  (rule-reference [name symbol?])
-  (list-reference [name symbol?])
-  (optional [e Rule-Expr?])
-  (repeat [e Rule-Expr?])
-  (sequence [es (listof Rule-Expr?)])
-  (alternative [es (listof Rule-Expr?)]))
+(provide compile-grammar)
 
 ; IR language
 
@@ -66,7 +51,8 @@
        (void)]
       [(rule-reference ref)
        (assert! (not (set-member? seen ref)) "found recursion in rule ~a" rulename)
-       (validate-expr! rulename (hash-ref rules ref) (set-add seen ref))]
+       (when (not (equal? ref 'dgndictation))
+         (validate-expr! rulename (hash-ref rules ref) (set-add seen ref)))]
       [(optional e)
        (validate-expr! rulename e seen)]
       [(repeat e)
@@ -74,7 +60,9 @@
       [(sequence es)
        (for-each (lambda (r) (validate-expr! rulename r seen)) es)]
       [(alternative es)
-       (for-each (lambda (r) (validate-expr! rulename r seen)) es)]))
+       (for-each (lambda (r) (validate-expr! rulename r seen)) es)]
+      [(action e _)
+       (validate-expr! rulename e seen)]))
   
   (for ([(rulename expr) rules])
     (validate-expr! rulename expr (set rulename))))
@@ -97,7 +85,9 @@
     [(sequence es)
      (flatten-composite 'sequence es)]
     [(alternative es)
-     (flatten-composite 'alternative es)]))
+     (flatten-composite 'alternative es)]
+    [(action e _)
+     (flatten-expr e)]))
 
 (module+ test
   (require rackunit)

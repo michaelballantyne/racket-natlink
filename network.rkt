@@ -1,9 +1,7 @@
 #lang racket
 
 (require
-  web-server/servlet-env
   net/xml-rpc/client
-  net/xml-rpc/server
   net/url-string)
 
 (provide
@@ -11,7 +9,8 @@
  load-grammar
  unload-grammar
  activate-rule
- deactivate-rule)
+ deactivate-rule
+ set-exclusive)
 
 (define endpoint
   (xml-rpc-server
@@ -25,15 +24,22 @@
  [load-grammar loadGrammar]
  [unload-grammar unloadGrammar]
  [activate-rule activate]
- [deactivate-rule deactivate])
+ [deactivate-rule deactivate]
+ [set-exclusive setExclusive])
 
 (define (init handler)
   (thread
    (lambda ()
-     (serve/servlet (make-handle-xml-rpc
-                     (hasheq 'result handler))
-                    #:port 5002
-                    #:servlet-path "/RPC2"
-                    #:command-line? #t
-                    #:listen-ip #f))))
+     (define buffer (make-bytes 65536))
+     (define socket (udp-open-socket #f #f))
+     (udp-bind! socket
+                #f
+                5003)
+     (let loop ()
+       (define-values (received-count host port)
+         (udp-receive! socket buffer))
+       (define res (bytes->string/utf-8 buffer #f 0 received-count))
+       (define decoded (string-split res "\0"))
+       (handler decoded)
+       (loop)))))
 
