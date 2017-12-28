@@ -8,6 +8,11 @@
   "actions-osx.rkt"
   data/either)
 
+(define dictation
+  (! 'dgndictation
+     (lambda (res)
+       (string-join res " "))))
+
 (define digits
   (value-mapping
    ["oh" 0]
@@ -245,9 +250,17 @@
      (! (: "numeral" number)
         (lambda (res)
           (second res)))
+     (! (: "say" dictation)
+        (lambda (res)
+          (second res)))
+     (! (: "spell" letters)
+        (lambda (res)
+          (second res)))
      (value-mapping
       ["space"
        'space]
+      ["quote string"
+       'string]
       ["dash"
        'dash]
       ["slash"
@@ -264,7 +277,6 @@
        'close]
       ["slap"
        'slap]
-      
       )
      'dgnwords))
    (lambda (words)
@@ -287,6 +299,9 @@
          ['bang
           ((key s-1))
           #t]
+         ['close
+          ((key right))
+          #t]
          ['open
           (if space-next?
               ((text " ()"))
@@ -298,6 +313,13 @@
           (if space-next?
               ((text " []"))
               ((text "[]")))
+          ((pause 50))
+          ((key left))
+          #f]
+         ['string
+          (if space-next?
+              ((text " \"\""))
+              ((text "\"\"")))
           ((pause 50))
           ((key left))
           #f]
@@ -334,6 +356,8 @@
      (key ctrl-f6)]
     ["indent file"
      (key cmd-i)]
+    ["new file"
+     (key cmd-n)]
     ["run code"
      (key cmd-r)]
     )))
@@ -348,8 +372,12 @@
     (text "git add ")]
    ["git commit"
     (seq (text "git commit -m \"\"") (key left))]
+   ["git push"
+    (text "git push")]
+   ["git diff"
+    (text "git diff")]
    ["press tab"
-        (key tab)]))
+    (key tab)]))
 
 (define hello-grammar
   (grammar (global-rule onoff-rule chrome-rule drracket-rule iterm-rule)
@@ -377,9 +405,11 @@
        [(: "spell" letters)
         (lambda (res)
           ((text (second res))))]
-       [(: "say" 'dgndictation)
+       [(: "say" dictation)
         (lambda (res)
-          ((text (string-join (second res) " "))))]))]))
+          ((text (second res))))]))]))
+
+
 
 (define result-parser (make-result-parser hello-grammar))
 
