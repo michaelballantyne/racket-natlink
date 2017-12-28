@@ -51,7 +51,7 @@
        (void)]
       [(rule-reference ref)
        (assert! (not (set-member? seen ref)) "found recursion in rule ~a" rulename)
-       (when (not (equal? ref 'dgndictation))
+       (when (not (or (equal? ref 'dgndictation) (equal? ref 'dgnwords)))
          (validate-expr! rulename (hash-ref rules ref) (set-add seen ref)))]
       [(optional e)
        (validate-expr! rulename e seen)]

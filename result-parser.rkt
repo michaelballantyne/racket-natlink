@@ -5,7 +5,7 @@
          data/applicative
          "core-grammar.rkt")
 
-(provide make-result-parser)
+(provide make-result-parser parse-words expr->parser)
 
 (define (word/p str)
   (satisfy/p (lambda (v) (equal? v str))))
@@ -34,13 +34,18 @@
     [(list-reference _)
      (error 'make-result-parser "list-reference not supported")]
     [(rule-reference ref)
-     (if (equal? ref 'dgndictation)
-         (wrap (many/p (satisfy/p (lambda (d) #t)) #:min 1))
-         (expr->parser (hash-ref rules ref) rules))]
+     (cond
+       [(equal? ref 'dgndictation)
+        (wrap (many/p (satisfy/p (lambda (d) #t)) #:min 1))]
+       [(equal? ref 'dgnwords)
+        (wrap (satisfy/p (lambda (d) #t)))]
+       [else
+        (expr->parser (hash-ref rules ref) rules)])]
     [(optional e)
      (wrap (many/p (expr->parser e rules) #:min 0 #:max 1))]
     [(repeat e)
-     (wrap (many/p (expr->parser e rules) #:min 1))]
+     (do [r <- (many/p (expr->parser e rules) #:min 1)]
+       (pure (lambda () (map (lambda (f) (f)) r))))]
     [(sequence es)
      (do [r <- (apply list/p (map (lambda (e) (expr->parser e rules)) es))]
        (pure (lambda () (map (lambda (f) (f)) r))))]

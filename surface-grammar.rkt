@@ -2,12 +2,12 @@
 
 (require (prefix-in c: "core-grammar.rkt"))
 
-(provide grammar or : ! ? + actions)
+(provide grammar or : ! ? + action-mapping value-mapping)
 
 (define-syntax-rule
   (grammar (exports ...)
            [rulename expr] ...)
-  (c:grammar '(dgndictation) '(exports ...)
+  (c:grammar '(dgndictation dgnwords) '(exports ...)
              (let ([rulename 'rulename] ...)
                (make-immutable-hash (list (cons rulename (lift expr)) ...)))))
 
@@ -32,10 +32,16 @@
 (define (+ g)
   (c:repeat (lift g)))
 
-(define-syntax-rule (actions [rule expr] ...)
+(define-syntax-rule (action-mapping [rule expr] ...)
   (or
    (! rule
       expr)
+   ...))
+
+(define-syntax-rule (value-mapping [rule expr] ...)
+  (or
+   (! rule
+      (lambda (ignore) expr))
    ...))
 
 (module+ test
