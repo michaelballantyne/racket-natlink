@@ -1,6 +1,6 @@
 #lang racket
 
-(require (prefix-in c: "core-grammar.rkt"))
+(require (prefix-in c: "core/core-grammar.rkt"))
 
 (provide grammar or : ! ? + action-mapping value-mapping)
 

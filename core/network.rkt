@@ -10,7 +10,8 @@
  unload-grammar
  activate-rule
  deactivate-rule
- set-exclusive)
+ set-exclusive
+ correct-recognition)
 
 (define endpoint
   (xml-rpc-server
@@ -25,7 +26,8 @@
  [unload-grammar unloadGrammar]
  [activate-rule activate]
  [deactivate-rule deactivate]
- [set-exclusive setExclusive])
+ [set-exclusive setExclusive]
+ [correct-recognition correct])
 
 (define (init handler)
   (thread

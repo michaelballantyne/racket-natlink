@@ -61,11 +61,15 @@
 
 (define (make-result-parser g)
   (match-define (grammar imports exports rules) g)
-  (define parse-grammar
-    (apply or/p
-           (for/list ([export exports])
-             (try/p (expr->parser (hash-ref rules export) rules)))))
-  (lambda (words)
+  (define rule-grammars
+    (for/hash ([export exports])
+              (values (symbol->string export) (try/p (expr->parser (hash-ref rules export) rules)))))
+
+  (lambda (words active-rules)
+    (define parse-grammar
+      (apply or/p
+             (for/list ([rule active-rules])
+               (hash-ref rule-grammars rule))))
     (parse-words parse-grammar words)))
 
 (module+ test
