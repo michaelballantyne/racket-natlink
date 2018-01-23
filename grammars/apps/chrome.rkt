@@ -10,6 +10,11 @@
   (action-mapping
    ["scratch all"
     (seq (key cmd-a) (key backspace))]
+   [(: "scratch word" number)
+    (lambda (result)
+      (for ([i (range (min 10 (second result)))])
+        ((key o-backspace))
+        ((pause 100))))]
    ["scratch word"
     (key o-backspace)]
    ["new tab"
@@ -26,10 +31,20 @@
     (key cmd-left)]
    ["go forward"
     (key cmd-right)]
-   ["page down"
-    (key space)]
+   [(: "page down" number)
+    (lambda (result)
+      (for ([i (range (min 10 (second result)))])
+        ((key space))
+        ((pause 100))))]
+   [(: "page up" number)
+    (lambda (result)
+      (for ([i (range (min 10 (second result)))])
+        ((key s-space))
+        ((pause 100))))]
    ["page up"
     (key s-space)]
+   ["page down"
+    (key space)]
    ["go to top"
     (key home)]
    ["go to bottom"

@@ -27,6 +27,10 @@
 
 (define window-management
   (action-mapping
+   ["volume up"
+    increase-volume]
+   ["volume down"
+    decrease-volume]
    ["hide window"
     (key cmd-h)]
    ["swick"

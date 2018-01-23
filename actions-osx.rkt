@@ -2,7 +2,7 @@
 
 (require (for-syntax syntax/parse))
 
-(provide key open-application seq pause text)
+(provide key open-application seq pause text increase-volume decrease-volume)
 
 (define (pause ms)
   (lambda _
@@ -26,6 +26,15 @@
   (close-output-port stdin)
   (close-input-port stderr)
   (void))
+
+(define decrease-volume
+  (lambda (_)
+    (applescript "set volume output volume (output volume of (get volume settings) - 6) --100%")))
+
+(define increase-volume
+  (lambda (_)
+    (applescript "set volume output volume (output volume of (get volume settings) + 6) --100%")))
+
 
 (define (open-application app)
   (lambda _
